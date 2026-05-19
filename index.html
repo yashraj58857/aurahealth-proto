@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraHealth Prototype</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --accent: #c084fc;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(192, 132, 252, 0.15) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            padding: 2rem;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo img {
+            -webkit-text-fill-color: initial;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            text-align: left;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+            transform: translateX(5px);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(192, 132, 252, 0.2));
+            color: var(--text-main);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem;
+            width: calc(100% - 280px);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .tab-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Dashboard specific */
+        .hero {
+            padding: 4rem;
+            text-align: center;
+            margin-top: 5vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero h2 {
+            color: var(--primary);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .hero h1 {
+            font-size: 4.5rem;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.6;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(192, 132, 252, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(192, 132, 252, 0.5);
+        }
+
+        /* Chatbot specific */
+        .chat-container {
+            height: calc(100vh - 4rem);
+            display: flex;
+            flex-direction: column;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .chat-header i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.5rem;
+            border-radius: 20px;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .message.bot {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(192, 132, 252, 0.2));
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-input {
+            padding: 1.5rem;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--glass-border);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-input button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-input button:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        /* Quiz specific */
+        .quiz-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem;
+        }
+
+        .quiz-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .quiz-header h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .question-card {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem;
+            border-radius: 15px;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .quiz-progress {
+            margin-top: 3rem;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Routine specific */
+        .routine-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .routine-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .dosha-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+        }
+
+        .dosha-tab-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 0.8rem 2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .dosha-tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .routine-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+        }
+
+        .routine-card {
+            padding: 2rem;
+        }
+
+        .routine-card h3 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 1.3rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.8rem;
+        }
+
+        .routine-item {
+            margin-bottom: 1.5rem;
+        }
+
+        .routine-item h4 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .routine-item p,
+        .routine-item ul {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .routine-item ul {
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .routine-item li {
+            margin-bottom: 0.5rem;
+        }
+
+        .eat-list {
+            color: #4ade80 !important;
+        }
+
+        .avoid-list {
+            color: #f87171 !important;
+        }
+
+        .routine-content-view {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .routine-content-view.active {
+            display: block;
+        }
+
+        /* Result View */
+        .result-view {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .result-view h2 {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .result-view p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive Layout Updates */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 220px;
+                padding: 1.5rem;
+            }
+
+            .main-content {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+            }
+
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 900px) {
+            body {
+                flex-direction: column;
+                padding-bottom: 80px;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 80px;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                padding: 0 1rem;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 1000;
+                border-radius: 20px 20px 0 0;
+                border-bottom: none;
+            }
+
+            .profile-section {
+                display: none;
+            }
+
+            .logo {
+                display: none;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-around;
+                gap: 0;
+            }
+
+            .nav-btn {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+                flex-direction: column;
+                gap: 0.3rem;
+                background: transparent !important;
+                border: none !important;
+                border-radius: 0;
+            }
+
+            .nav-btn i {
+                font-size: 1.2rem;
+            }
+
+            .nav-btn.active {
+                color: var(--primary);
+                background: transparent !important;
+                border: none !important;
+                transform: translateY(-3px);
+            }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .mobile-top-header {
+                display: flex;
+                align-items: center;
+                padding: 1rem 1.5rem;
+                background: var(--glass-bg);
+                backdrop-filter: blur(12px);
+                position: sticky;
+                top: 0;
+                z-index: 999;
+                border-bottom: 1px solid var(--glass-border);
+            }
+
+            .mobile-top-header .logo {
+                display: flex;
+            }
+
+            .hero {
+                padding: 2rem 1rem;
+                margin-top: 2vh;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .routine-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .routine-card[style] {
+                grid-column: span 1 !important;
+            }
+
+            .dosha-tabs {
+                flex-wrap: wrap;
+            }
+
+            .chat-container {
+                height: calc(100vh - 160px);
+            }
+        }
+
+        @media (min-width: 901px) {
+            .mobile-top-header {
+                display: none;
+            }
+        }
+        /* Login Overlay */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--bg-color);
+            background-image:
+                radial-gradient(at 30% 20%, rgba(56, 189, 248, 0.2) 0px, transparent 50%),
+                radial-gradient(at 70% 80%, rgba(192, 132, 252, 0.2) 0px, transparent 50%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .login-overlay.hidden { display: none; }
+
+        .login-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 420px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        }
+
+        .login-box h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .login-box p {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: white;
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .login-input:focus {
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: opacity 0.3s, transform 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .login-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .login-error {
+            color: #f87171;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            min-height: 1.2rem;
+        }
+
+        /* Profile Section in Sidebar */
+        .profile-section {
+            margin-top: auto;
+            padding: 1rem;
+            border-top: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin: 0 auto 0.5rem;
+        }
+
+        .profile-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        .profile-dosha {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 0.4rem 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(248,113,113,0.15);
+            border-color: rgba(248,113,113,0.3);
+            color: #f87171;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Edit Profile Modal -->
+    <div class="login-overlay hidden" id="profileModal" style="z-index: 2000;">
+        <div class="login-box" style="padding: 2.5rem;">
+            <img src="logo.jpeg" alt="AuraHealth" style="height:60px; margin-bottom:1.5rem;">
+            <h2 style="margin-bottom: 0.5rem;">Update Profile</h2>
+            <p style="font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-bottom: 1.5rem;">Personalize your AuraHealth experience.</p>
+            
+            <div style="text-align: left; margin-bottom: 1rem;">
+                <label style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 4px; display: block;">NAME</label>
+                <input type="text" class="login-input" id="editName" placeholder="Your Name" style="margin-bottom: 0;">
+            </div>
+
+            <div style="text-align: left; margin-bottom: 1.5rem;">
+                <label style="font-size: 0.8rem; color: var(--primary); font-weight: 600; margin-bottom: 4px; display: block;">EMAIL</label>
+                <input type="email" class="login-input" id="editEmail" placeholder="Email Address" style="margin-bottom: 0;">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                <button class="login-btn" onclick="saveProfileChanges()" style="flex: 2; margin-top: 0; background: linear-gradient(135deg, var(--primary), var(--accent));">
+                    <i class="fa-solid fa-check" style="margin-right:8px;"></i> Save Changes
+                </button>
+                <button class="login-btn" onclick="closeProfileModal()" style="flex: 1; margin-top: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Top Header -->
+    <div class="mobile-top-header">
+        <a href="#" class="logo" style="text-decoration:none; display:flex; justify-content:center; width:100%;">
+            <img src="logo.jpeg" alt="AuraHealth Logo"
+                style="height: 50px; width: auto; max-width: 100%; object-fit: contain;">
+        </a>
+    </div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar glass">
+        <a href="#" class="logo"
+            style="text-decoration:none; display:flex; justify-content:center; margin-bottom: 1rem;">
+            <img src="logo.jpeg" alt="AuraHealth Logo"
+                style="height: 60px; width: auto; max-width: 100%; object-fit: contain;">
+        </a>
+        <div class="nav-links">
+            <button class="nav-btn active" onclick="switchMainTab('dashboard-tab', this)">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </button>
+            <button class="nav-btn" onclick="switchMainTab('chat-tab', this)">
+                <i class="fa-solid fa-robot"></i> AI Chatbot
+            </button>
+            <button class="nav-btn" onclick="switchMainTab('quiz-tab', this)">
+                <i class="fa-solid fa-clipboard-question"></i> Dosha Quiz
+            </button>
+            <button class="nav-btn" onclick="switchMainTab('routine-tab', this)">
+                <i class="fa-solid fa-calendar-check"></i> Daily Routine
+            </button>
+        </div>
+        <!-- Profile Section -->
+        <div class="profile-section" id="profileSection" onclick="openProfileModal()" style="cursor: pointer; transition: all 0.3s; position: relative;" 
+             onmouseover="this.style.background='rgba(255,255,255,0.08)'" 
+             onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+            <div class="profile-avatar" id="profileAvatar">G</div>
+            <div class="profile-name" id="profileName">Guest User</div>
+            <div class="profile-dosha" id="profileDosha">Dosha: Not determined</div>
+            <div style="font-size: 0.7rem; color: var(--primary); margin-top: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                <i class="fa-solid fa-pen-to-square" style="margin-right: 4px;"></i> Edit Profile
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- 1. Dashboard Tab -->
+        <section id="dashboard-tab" class="tab-section active">
+            <div class="hero glass">
+                <h2>AI-Powered Health Assistant</h2>
+                <h1>Holistic Wellbeing<br>Reimagined.</h1>
+                <p
+                    style="font-size: 2.8rem; font-weight: 600; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1.5rem; letter-spacing: 1px;">
+                    Ancient Wisdom Intelligent Health</p>
+                <p>Discover your Ayurvedic body type through our Dosha Quiz, receive personalized daily routines, and
+                    explore ancient wisdom with your AI wellness assistant.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn-primary" onclick="document.querySelectorAll('.nav-btn')[1].click()">Talk to
+                        AI</button>
+                    <button class="btn-primary"
+                        style="background: transparent; border: 1px solid var(--accent); box-shadow: none;"
+                        onclick="document.querySelectorAll('.nav-btn')[2].click()">Take Dosha Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. AI Chatbot Tab -->
+        <section id="chat-tab" class="tab-section">
+            <div class="chat-container glass">
+                <div class="chat-header">
+                    <i class="fa-solid fa-robot"></i>
+                    <div>
+                        <h3 style="margin:0; font-size: 1.2rem;">Aura AI Assistant</h3>
+                        <span style="font-size: 0.8rem; color: #4ade80;">● Online</span>
+                    </div>
+                </div>
+                <div class="chat-messages" id="chatBox">
+                    <div class="message bot">Namaste! I am Aura, your holistic health and wellness guide. Ask me about
+                        your symptoms, daily routines, or ayurvedic wisdom.</div>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Type your health queries here..."
+                        onkeypress="handleChatEnter(event)">
+                    <button onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Dosha Quiz Tab -->
+        <section id="quiz-tab" class="tab-section">
+            <div class="quiz-wrapper glass" id="quizContainer">
+                <div class="quiz-header">
+                    <h2>Discover Your Dosha</h2>
+                    <p style="color: var(--text-muted)">Answer a few questions to find your dominant mind-body type.</p>
+                </div>
+
+                <div id="questionsContainer">
+                    <!-- Questions injected by JS -->
+                </div>
+
+                <div class="quiz-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+
+            <!-- Quiz Result View -->
+            <div class="quiz-wrapper glass" id="resultContainer" style="display: none;">
+                <div class="result-view">
+                    <h3
+                        style="color: var(--primary); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">
+                        Your Dominant Dosha is</h3>
+                    <h2 id="resultTitle">Vata</h2>
+                    <p id="resultDesc">Vata dosha is associated with air and space. You are naturally creative,
+                        energetic, and adaptable.</p>
+                    <button class="btn-primary" onclick="goToRoutineFromResult()">View My Personalized Routine</button>
+                    <button class="btn-primary"
+                        style="background: transparent; border: 1px solid var(--text-muted); box-shadow: none; margin-left: 1rem;"
+                        onclick="resetQuiz()">Retake Quiz</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Daily Routine Tab -->
+        <section id="routine-tab" class="tab-section">
+            <div class="routine-container">
+                <div class="routine-header">
+                    <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Personalized Daily Routine</h2>
+                    <p style="color: var(--text-muted)">Comprehensive lifestyle and dietary recommendations based on
+                        Ayurvedic principles.</p>
+                </div>
+
+                <div class="dosha-tabs">
+                    <button class="dosha-tab-btn active" onclick="switchRoutine('vata', this)">Vata</button>
+                    <button class="dosha-tab-btn" onclick="switchRoutine('pitta', this)">Pitta</button>
+                    <button class="dosha-tab-btn" onclick="switchRoutine('kapha', this)">Kapha</button>
+                </div>
+
+                <!-- Vata Routine -->
+                <div id="routine-vata" class="routine-content-view active">
+                    <div class="routine-grid">
+                        <!-- Daily Schedule Timeline -->
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-clock"></i> Daily Schedule (Dinacharya)</h3>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-top:1rem;">
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">🌅 6:00 AM</h4>
+                                    <p>Wake up, tongue scraping, warm water with lemon</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">🧘 6:30 AM</h4>
+                                    <p>Oil self-massage (Abhyanga), gentle yoga & meditation</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">🍳 8:00 AM</h4>
+                                    <p>Warm, cooked breakfast with ghee and spices</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">🥗 12:30 PM</h4>
+                                    <p>Largest meal of the day — warm, nourishing lunch</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">🍵 4:00 PM</h4>
+                                    <p>Herbal tea (ginger/cinnamon), light snack</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">🍲 6:30 PM</h4>
+                                    <p>Light, warm dinner — soups, stews, kitchari</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">📖 9:00 PM</h4>
+                                    <p>Wind down — no screens, journaling, warm milk</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#06b6d4;">😴 10:00 PM</h4>
+                                    <p>Sleep — consistent bedtime is essential for Vata</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Morning Ritual -->
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-sun"></i> Morning Ritual</h3>
+                            <div class="routine-item">
+                                <h4>Tongue Scraping</h4>
+                                <p>Use a copper scraper to remove toxins (Ama) from the tongue every morning before drinking water.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Abhyanga (Self-Massage)</h4>
+                                <p>Massage your body with warm <strong>sesame oil</strong> for 5-10 minutes before showering. This calms the nervous system and deeply moisturizes dry Vata skin.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Warm Lemon Water</h4>
+                                <p>Start your day with a glass of warm water with lemon and a pinch of ginger to ignite digestion.</p>
+                            </div>
+                        </div>
+
+                        <!-- Grounding Ritual (Vata-specific) -->
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-mountain-sun"></i> Grounding Ritual</h3>
+                            <div class="routine-item">
+                                <h4>Earthing Practice</h4>
+                                <p>Walk barefoot on grass or earth for 10 minutes daily. Vata's airy nature needs direct grounding contact.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Warm Bath Soak</h4>
+                                <p>Take a warm bath with lavender or chamomile essential oils in the evening to calm an overactive mind.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Consistency is Key</h4>
+                                <p>Vata thrives on routine. Eat, sleep, and wake at the <strong>same time every day</strong> — this is your most powerful medicine.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-bed"></i> Rest & Hydration</h3>
+                            <div class="routine-item">
+                                <h4>Water Intake</h4>
+                                <p><strong>Amount:</strong> 2.5 - 3 Liters daily.</p>
+                                <p><strong>Method:</strong> Drink warm or room temperature water. Sip slowly throughout
+                                    the day. Avoid ice-cold water as it disrupts Vata digestion.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Sleep Cycle</h4>
+                                <p><strong>Amount:</strong> 7 - 8.5 hours.</p>
+                                <p><strong>Timing:</strong> Bedtime by 10:00 PM. Wake up around 6:00 AM. Vata types need
+                                    more rest to ground their active nervous systems.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-bolt"></i> Macros & Nutrients</h3>
+                            <div class="routine-item">
+                                <h4>Proteins & Vitamins</h4>
+                                <p><strong>Proteins:</strong> Moderate intake. Eggs, warm milk, mung beans, red lentils,
+                                    and well-cooked poultry are excellent.</p>
+                                <p><strong>Vitamins/Minerals:</strong> Focus on B-Complex (for nervous system),
+                                    Magnesium (for relaxation), and Vitamin D.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Exercise</h4>
+                                <p>Gentle, grounding exercises. Yoga, Tai Chi, walking, and light cycling. Avoid
+                                    exhaustive, high-intensity workouts.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-utensils"></i> Dietary Guidelines</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                <div class="routine-item">
+                                    <h4 class="eat-list">What to Eat (Favour)</h4>
+                                    <ul>
+                                        <li>Warm, freshly cooked, nourishing foods.</li>
+                                        <li>Healthy fats: Ghee, olive oil, sesame oil.</li>
+                                        <li>Grains: Rice, cooked oats, wheat.</li>
+                                        <li>Sweet, ripe fruits: Bananas, avocados, berries, cooked apples.</li>
+                                        <li>Spices: Ginger, cinnamon, cardamom, cumin.</li>
+                                    </ul>
+                                </div>
+                                <div class="routine-item">
+                                    <h4 class="avoid-list">What to Avoid (Minimize)</h4>
+                                    <ul>
+                                        <li>Cold, dry, and raw foods (like raw salads in winter).</li>
+                                        <li>Highly processed foods and dry crackers.</li>
+                                        <li>Excessive caffeine and stimulants.</li>
+                                        <li>Astringent fruits like cranberries or unripe bananas.</li>
+                                        <li>Cold beverages and ice.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-person-running"></i> Exercise, Yoga & Mudra</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-dumbbell" style="margin-right:6px;"></i> Exercise</h4>
+                                    <p>Gentle Yoga Flow, Tai Chi, Walking Meditation, light stretching.</p>
+                                    <a href="https://www.youtube.com/results?search_query=gentle+yoga+for+vata+dosha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-spa" style="margin-right:6px;"></i> Yoga Poses</h4>
+                                    <p>Tadasana (Mountain), Vrikshasana (Tree), Balasana (Child's Pose), Viparita
+                                        Karani.</p>
+                                    <a href="https://www.youtube.com/results?search_query=grounding+yoga+poses+vata+dosha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-hand" style="margin-right:6px;"></i> Mudras</h4>
+                                    <p>Vayu Mudra (calms air), Prana Mudra (boosts vitality), Gyan Mudra (focus &amp;
+                                        grounding).</p>
+                                    <a href="https://www.youtube.com/results?search_query=vayu+mudra+prana+mudra+for+vata"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mindfulness & Mental Wellness -->
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-brain"></i> Mindfulness & Mental Wellness</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-om" style="margin-right:6px;"></i> Meditation</h4>
+                                    <p>Practice 10-15 minutes of guided or mantra meditation daily. Focus on grounding visualizations (roots growing into earth).</p>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-wind" style="margin-right:6px;"></i> Pranayama</h4>
+                                    <p>Nadi Shodhana (Alternate Nostril Breathing) — calms the nervous system and balances Vata's scattered energy.</p>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-book" style="margin-right:6px;"></i> Journaling</h4>
+                                    <p>Write 3 things you're grateful for each night. This quiets the racing Vata mind and promotes restful sleep.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Pitta Routine -->
+                <div id="routine-pitta" class="routine-content-view">
+                    <div class="routine-grid">
+                        <!-- Daily Schedule Timeline -->
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-clock"></i> Daily Schedule (Dinacharya)</h3>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-top:1rem;">
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🌅 6:00 AM</h4>
+                                    <p>Wake up, tongue scraping, cool water with mint</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🧘 6:30 AM</h4>
+                                    <p>Coconut oil massage, cooling yoga & pranayama</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🍳 7:30 AM</h4>
+                                    <p>Cool, sweet breakfast — oats with fruits, milk</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🥗 12:00 PM</h4>
+                                    <p>Largest meal — cooling, balanced lunch</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🍵 3:30 PM</h4>
+                                    <p>Mint or fennel tea, sweet fruit snack</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🍲 6:30 PM</h4>
+                                    <p>Moderate dinner — salads, grains, cooling herbs</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">🌙 9:30 PM</h4>
+                                    <p>Moonlit walk, cool shower, relaxation</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#ef4444;">😴 10:30 PM</h4>
+                                    <p>Sleep — avoid working past 10 PM (Pitta peak)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Morning Ritual -->
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-sun"></i> Morning Ritual</h3>
+                            <div class="routine-item">
+                                <h4>Tongue Scraping</h4>
+                                <p>Use a silver or stainless steel scraper to clear Pitta toxins from the tongue each morning.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Abhyanga (Self-Massage)</h4>
+                                <p>Massage with <strong>coconut oil</strong> or sunflower oil — these are cooling and soothe Pitta's internal heat.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Cool Water with Mint</h4>
+                                <p>Start your day with room-temperature water infused with fresh mint or rose petals.</p>
+                            </div>
+                        </div>
+
+                        <!-- Cooling Ritual (Pitta-specific) -->
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-snowflake"></i> Cooling Ritual</h3>
+                            <div class="routine-item">
+                                <h4>Moonlit Walks</h4>
+                                <p>Take evening walks under the moonlight. The cool night air naturally pacifies Pitta's fiery energy.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Rose Water Spray</h4>
+                                <p>Keep a rose water spray handy. Mist your face throughout the day — it cools the skin and calms the mind.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Avoid Overworking</h4>
+                                <p>Pitta types push too hard. Schedule <strong>breaks every 90 minutes</strong> and avoid the urge to be "always on."</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-bed"></i> Rest & Hydration</h3>
+                            <div class="routine-item">
+                                <h4>Water Intake</h4>
+                                <p><strong>Amount:</strong> 3 - 3.5 Liters daily.</p>
+                                <p><strong>Method:</strong> Cool or room temperature water. Pitta types run hot and need
+                                    more hydration. Coconut water is highly beneficial.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Sleep Cycle</h4>
+                                <p><strong>Amount:</strong> 7 - 8 hours.</p>
+                                <p><strong>Timing:</strong> Bedtime by 10:30 PM. Wake up by 6:00 AM. Avoid staying up
+                                    late working, as Pitta peak time is 10 PM - 2 AM.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-bolt"></i> Macros & Nutrients</h3>
+                            <div class="routine-item">
+                                <h4>Proteins & Vitamins</h4>
+                                <p><strong>Proteins:</strong> Moderate to high. Legumes, tofu, pumpkin seeds, dairy, and
+                                    white meats.</p>
+                                <p><strong>Vitamins/Minerals:</strong> Iron, Vitamin C (cooling), and Zinc.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Exercise</h4>
+                                <p>Moderate intensity. Swimming, winter sports, cycling, and cooling yoga. Avoid
+                                    exercising during the peak heat of the day.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-utensils"></i> Dietary Guidelines</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                <div class="routine-item">
+                                    <h4 class="eat-list">What to Eat (Favour)</h4>
+                                    <ul>
+                                        <li>Cooling, slightly dry, and heavy foods.</li>
+                                        <li>Sweet, bitter, and astringent tastes.</li>
+                                        <li>Grains: Barley, oats, basmati rice, wheat.</li>
+                                        <li>Dairy: Milk, butter, ghee.</li>
+                                        <li>Cooling spices: Coriander, fennel, mint, saffron.</li>
+                                    </ul>
+                                </div>
+                                <div class="routine-item">
+                                    <h4 class="avoid-list">What to Avoid (Minimize)</h4>
+                                    <ul>
+                                        <li>Spicy, hot, fried, and greasy foods.</li>
+                                        <li>Sour and highly acidic foods (vinegar, sour cream).</li>
+                                        <li>Excessive garlic, onions, and chili peppers.</li>
+                                        <li>Red meat and overly salty foods.</li>
+                                        <li>Alcohol and excessive coffee.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-person-running"></i> Exercise, Yoga & Mudra</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-dumbbell" style="margin-right:6px;"></i> Exercise</h4>
+                                    <p>Swimming, Cycling, Moonlit Jogging, moderate-intensity cardio.</p>
+                                    <a href="https://www.youtube.com/results?search_query=cooling+exercise+for+pitta+dosha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-spa" style="margin-right:6px;"></i> Yoga Poses</h4>
+                                    <p>Shitali Pranayama (cooling breath), Ardha Chandrasana, Paschimottanasana,
+                                        Shavasana.</p>
+                                    <a href="https://www.youtube.com/results?search_query=cooling+yoga+for+pitta+dosha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-hand" style="margin-right:6px;"></i> Mudras</h4>
+                                    <p>Shankh Mudra (cools inner fire), Prithvi Mudra (stability), Apana Mudra (detox).
+                                    </p>
+                                    <a href="https://www.youtube.com/results?search_query=shankh+mudra+pitta+cooling+mudra"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mindfulness & Mental Wellness -->
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-brain"></i> Mindfulness & Mental Wellness</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-om" style="margin-right:6px;"></i> Meditation</h4>
+                                    <p>Practice 15-20 minutes of loving-kindness or compassion meditation. This softens Pitta's competitive edge.</p>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-wind" style="margin-right:6px;"></i> Pranayama</h4>
+                                    <p>Shitali (Cooling Breath) — curl the tongue and inhale through it. This directly reduces body heat and irritability.</p>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-palette" style="margin-right:6px;"></i> Creative Outlet</h4>
+                                    <p>Channel intensity into art, music, or gardening. Pitta needs non-competitive activities to unwind.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Kapha Routine -->
+                <div id="routine-kapha" class="routine-content-view">
+                    <div class="routine-grid">
+                        <!-- Daily Schedule Timeline -->
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-clock"></i> Daily Schedule (Dinacharya)</h3>
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-top:1rem;">
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">🌅 5:30 AM</h4>
+                                    <p>Wake up early! Kapha must rise before 6 AM to avoid heaviness</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">💪 6:00 AM</h4>
+                                    <p>Vigorous exercise — running, HIIT, power yoga</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">🍳 8:00 AM</h4>
+                                    <p>Light, warm breakfast — spiced oats, fruits, honey</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">🥗 12:00 PM</h4>
+                                    <p>Largest meal — light, spicy, and warm foods</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">🍵 3:00 PM</h4>
+                                    <p>Ginger or tulsi tea — NO napping!</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">🍲 6:00 PM</h4>
+                                    <p>Very light dinner — soup, steamed veggies, salad</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">🎯 7:00 PM</h4>
+                                    <p>Active hobby — dancing, social activity, learning</p>
+                                </div>
+                                <div class="routine-item" style="text-align:center;">
+                                    <h4 style="color:#10b981;">😴 11:00 PM</h4>
+                                    <p>Sleep — Kapha can stay up a bit later than others</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Morning Ritual -->
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-sun"></i> Morning Ritual</h3>
+                            <div class="routine-item">
+                                <h4>Tongue Scraping</h4>
+                                <p>Use a copper scraper. Kapha types accumulate the most tongue coating (Ama) overnight — this is essential.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Dry Brushing (Garshana)</h4>
+                                <p>Use raw silk gloves or a dry brush on your body before showering. This stimulates circulation and reduces Kapha sluggishness — <strong>more effective than oil massage for Kapha</strong>.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Hot Ginger Water</h4>
+                                <p>Boil water with fresh ginger and a pinch of black pepper. This fires up your metabolism from the start.</p>
+                            </div>
+                        </div>
+
+                        <!-- Energizing Ritual (Kapha-specific) -->
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-fire-flame-curved"></i> Energizing Ritual</h3>
+                            <div class="routine-item">
+                                <h4>Cold Shower Finish</h4>
+                                <p>End your shower with 30 seconds of cold water. This shocks Kapha's system awake and boosts circulation.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>No Daytime Naps</h4>
+                                <p>Sleeping during the day dramatically increases Kapha. If tired, take a brisk 10-minute walk instead.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Spice Everything</h4>
+                                <p>Add <strong>black pepper, ginger, and cayenne</strong> liberally to meals. Spice is Kapha's best friend for keeping metabolism high.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-bed"></i> Rest & Hydration</h3>
+                            <div class="routine-item">
+                                <h4>Water Intake</h4>
+                                <p><strong>Amount:</strong> 2 - 2.5 Liters daily.</p>
+                                <p><strong>Method:</strong> Warm water or herbal teas. Kapha types hold onto water
+                                    easily, so excessive drinking isn't needed. Ginger tea is excellent.</p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Sleep Cycle</h4>
+                                <p><strong>Amount:</strong> 6 - 7 hours.</p>
+                                <p><strong>Timing:</strong> Bedtime by 11:00 PM. Wake up by 5:30 AM or 6:00 AM. Sleeping
+                                    during the day strictly increases Kapha.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass">
+                            <h3><i class="fa-solid fa-bolt"></i> Macros & Nutrients</h3>
+                            <div class="routine-item">
+                                <h4>Proteins & Vitamins</h4>
+                                <p><strong>Proteins:</strong> Light proteins. Lentils, black beans, quinoa, and limited
+                                    lean meats. Avoid heavy dairy.</p>
+                                <p><strong>Vitamins/Minerals:</strong> Vitamin C, B-12, and Iron to boost metabolism.
+                                </p>
+                            </div>
+                            <div class="routine-item">
+                                <h4>Exercise</h4>
+                                <p>Vigorous, stimulating exercise daily. Running, aerobics, active vinyasa yoga, martial
+                                    arts. Kapha needs to break a sweat.</p>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-utensils"></i> Dietary Guidelines</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                                <div class="routine-item">
+                                    <h4 class="eat-list">What to Eat (Favour)</h4>
+                                    <ul>
+                                        <li>Light, dry, warm, and spicy foods.</li>
+                                        <li>Pungent, bitter, and astringent tastes.</li>
+                                        <li>Veggies: Leafy greens, broccoli, cauliflower, celery.</li>
+                                        <li>Grains: Quinoa, buckwheat, millet, rye.</li>
+                                        <li>Spices: Black pepper, ginger, garlic, cayenne, mustard.</li>
+                                    </ul>
+                                </div>
+                                <div class="routine-item">
+                                    <h4 class="avoid-list">What to Avoid (Minimize)</h4>
+                                    <ul>
+                                        <li>Heavy, oily, cold, and sweet foods.</li>
+                                        <li>Dairy products (cheese, yogurt, ice cream).</li>
+                                        <li>Excessive nuts and oils.</li>
+                                        <li>Refined sugars and carbohydrates.</li>
+                                        <li>Juicy, sweet fruits like melons or heavy bananas.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-person-running"></i> Exercise, Yoga & Mudra</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-dumbbell" style="margin-right:6px;"></i> Exercise</h4>
+                                    <p>HIIT Circuit, Power Yoga, Jump Rope, Running, Aerobics, Martial Arts.</p>
+                                    <a href="https://www.youtube.com/results?search_query=high+intensity+exercise+for+kapha+dosha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-spa" style="margin-right:6px;"></i> Yoga Poses</h4>
+                                    <p>Surya Namaskar (Sun Salutation), Ustrasana (Camel), Dhanurasana (Bow), Kapalbhati
+                                        Pranayama.</p>
+                                    <a href="https://www.youtube.com/results?search_query=energizing+yoga+for+kapha+dosha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-hand" style="margin-right:6px;"></i> Mudras</h4>
+                                    <p>Surya Mudra (boosts metabolism), Linga Mudra (generates heat), Kapha Nashak
+                                        Mudra.</p>
+                                    <a href="https://www.youtube.com/results?search_query=surya+mudra+linga+mudra+for+kapha"
+                                        target="_blank"
+                                        style="display:inline-flex;align-items:center;gap:6px;margin-top:8px;padding:8px 16px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);border-radius:20px;color:#ff6b6b;text-decoration:none;font-size:0.9rem;transition:all 0.3s;"><i
+                                            class="fa-brands fa-youtube"></i> Watch on YouTube</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mindfulness & Mental Wellness -->
+                        <div class="routine-card glass" style="grid-column: span 2;">
+                            <h3><i class="fa-solid fa-brain"></i> Mindfulness & Mental Wellness</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem;">
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-om" style="margin-right:6px;"></i> Meditation</h4>
+                                    <p>Practice 10 minutes of active, stimulating meditation — visualization of fire or light. Avoid passive, sleepy styles.</p>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-wind" style="margin-right:6px;"></i> Pranayama</h4>
+                                    <p>Kapalbhati (Skull-Shining Breath) — rapid exhales through the nose. This fires up energy and clears congestion.</p>
+                                </div>
+                                <div class="routine-item">
+                                    <h4><i class="fa-solid fa-users" style="margin-right:6px;"></i> Social Activity</h4>
+                                    <p>Kapha tends to isolate. Schedule social time weekly — dancing, group classes, or community volunteering.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- Auth & Profile Logic ---
+        // --- Profile & Persistence Logic ---
+        let currentUser = { name: "Guest User", email: "guest@aurahealth.com", dosha: null };
+
+        function initAuth() {
+            const savedEmail = localStorage.getItem('aurahealth_current');
+            const allUsers = JSON.parse(localStorage.getItem('aurahealth_users') || '{}');
+            
+            if (savedEmail && allUsers[savedEmail]) {
+                currentUser = allUsers[savedEmail];
+            } else {
+                const firstUserKey = Object.keys(allUsers)[0];
+                if (firstUserKey) {
+                    currentUser = allUsers[firstUserKey];
+                    localStorage.setItem('aurahealth_current', currentUser.email);
+                }
+            }
+            applyUserProfile();
+        }
+
+        function openProfileModal() {
+            document.getElementById('editName').value = currentUser.name;
+            document.getElementById('editEmail').value = currentUser.email;
+            document.getElementById('profileModal').classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.add('hidden');
+        }
+
+        function saveProfileChanges() {
+            const newName = document.getElementById('editName').value.trim() || "Guest User";
+            const newEmail = document.getElementById('editEmail').value.trim() || "guest@aurahealth.com";
+
+            const allUsers = JSON.parse(localStorage.getItem('aurahealth_users') || '{}');
+            
+            if (currentUser.email !== newEmail) {
+                delete allUsers[currentUser.email];
+            }
+
+            currentUser.name = newName;
+            currentUser.email = newEmail;
+            
+            allUsers[newEmail] = currentUser;
+            localStorage.setItem('aurahealth_users', JSON.stringify(allUsers));
+            localStorage.setItem('aurahealth_current', newEmail);
+            
+            applyUserProfile();
+            closeProfileModal();
+            showAuraNotification("✨ Profile updated successfully!");
+        }
+
+        function applyUserProfile() {
+            if (!currentUser) return;
+            const avatar = document.getElementById('profileAvatar');
+            const nameEl = document.getElementById('profileName');
+            const doshaEl = document.getElementById('profileDosha');
+            
+            if (avatar) avatar.textContent = currentUser.name.charAt(0).toUpperCase();
+            if (nameEl) nameEl.textContent = currentUser.name;
+            if (doshaEl) doshaEl.textContent = currentUser.dosha ? 'Dosha: ' + currentUser.dosha.charAt(0).toUpperCase() + currentUser.dosha.slice(1) : 'Dosha: Not determined';
+
+            if (currentUser.dosha) {
+                lastDominantDosha = currentUser.dosha;
+                syncRoutineTab(currentUser.dosha);
+            }
+        }
+
+        function saveUserDosha(dosha) {
+            if (!currentUser) return;
+            currentUser.dosha = dosha;
+            const allUsers = JSON.parse(localStorage.getItem('aurahealth_users') || '{}');
+            allUsers[currentUser.email] = currentUser;
+            localStorage.setItem('aurahealth_users', JSON.stringify(allUsers));
+            applyUserProfile();
+        }
+
+        // --- Navigation Logic ---
+        function switchMainTab(tabId, btnElement) {
+            // Update buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if (btnElement) btnElement.classList.add('active');
+
+            // Update sections
+            document.querySelectorAll('.tab-section').forEach(section => section.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            // Re-init quiz if switching to quiz tab to ensure it's loaded
+            if (tabId === 'quiz-tab') {
+                initQuiz();
+            }
+        }
+
+        // --- Routine Tabs Logic ---
+        function switchRoutine(dosha, btnElement) {
+            document.querySelectorAll('.dosha-tab-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            document.querySelectorAll('.routine-content-view').forEach(view => view.classList.remove('active'));
+            document.getElementById(`routine-${dosha}`).classList.add('active');
+        }
+
+        // Auto-sync routine tab to the user's dosha result
+        function syncRoutineTab(dosha) {
+            const tabs = document.querySelectorAll('.dosha-tab-btn');
+            tabs.forEach(tab => {
+                if (tab.innerText.toLowerCase() === dosha) {
+                    tab.click();
+                }
+            });
+        }
+
+        let lastDominantDosha = null; // stores the quiz result
+
+        function goToRoutineFromResult() {
+            // Navigate to Daily Routine tab
+            document.querySelectorAll('.nav-btn')[3].click();
+
+            // Auto-select the correct dosha tab
+            const tabs = document.querySelectorAll('.dosha-tab-btn');
+            tabs.forEach(tab => {
+                if (tab.innerText.toLowerCase() === lastDominantDosha) {
+                    tab.click();
+                }
+            });
+        }
+
+        // --- Chatbot Logic ---
+        const quizTriggers = ['dosha quiz', 'take quiz', 'quiz', 'dosha test', 'find my dosha', 'discover my dosha', 'body type', 'what is my dosha'];
+        let chatQuiz = { active: false, currentQ: 0, scores: { vata: 0, pitta: 0, kapha: 0 }, answers: [] };
+        let chatHistory = []; // Stores the last few messages for AI memory
+        const AURA_CORE_ENGINE = 'https://aurahealth-proto.vercel.app/api/chat';
+
+        function addBotMessage(text) {
+            const chatBox = document.getElementById('chatBox');
+            const botMsg = document.createElement('div');
+            botMsg.className = 'message bot';
+            botMsg.innerHTML = text;
+            chatBox.appendChild(botMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return botMsg;
+        }
+
+        function addUserMessage(text) {
+            const chatBox = document.getElementById('chatBox');
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerText = text;
+            chatBox.appendChild(userMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function startChatQuiz() {
+            chatQuiz = { active: true, currentQ: 0, scores: { vata: 0, pitta: 0, kapha: 0 }, answers: [] };
+            addBotMessage("Great! Let's discover your Dosha. I'll ask you 10 quick questions. Click an option or type your own answer! 🧘");
+            setTimeout(() => showChatQuizQuestion(0), 600);
+        }
+
+        function showChatQuizQuestion(index) {
+            if (index >= quizData.length) { finishChatQuiz(); return; }
+            const q = quizData[index];
+            let html = `<strong>Q${index + 1}/10: ${q.question}</strong><div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">`;
+            q.options.forEach(opt => {
+                html += `<button onclick="handleChatQuizClick('${opt.type}', '${opt.text.replace(/'/g, "\\'")}', ${index})" 
+                    style="background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); color:white; padding:10px 14px; border-radius:12px; cursor:pointer; text-align:left; font-size:0.9rem; transition:all 0.2s;"
+                    onmouseover="this.style.background='rgba(139,92,246,0.3)'; this.style.borderColor='rgba(139,92,246,0.6)'"
+                    onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.15)'"
+                    >${opt.text}</button>`;
+            });
+            html += `</div><p style="font-size:0.8rem; color:rgba(255,255,255,0.4); margin-top:8px;">Or type your own answer below ↓</p>`;
+            addBotMessage(html);
+        }
+
+        function handleChatQuizClick(type, text, qIndex) {
+            addUserMessage(text);
+            chatQuiz.scores[type]++;
+            chatQuiz.answers.push({ question: quizData[qIndex].question, answer: text, type: type });
+            chatQuiz.currentQ = qIndex + 1;
+
+            // Disable buttons on this question so user can't click again
+            const chatBox = document.getElementById('chatBox');
+            const allBotMsgs = chatBox.querySelectorAll('.message.bot');
+            const lastBotMsg = allBotMsgs[allBotMsgs.length - 1];
+            if (lastBotMsg) {
+                lastBotMsg.querySelectorAll('button').forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.4';
+                    btn.style.cursor = 'default';
+                });
+            }
+
+            setTimeout(() => showChatQuizQuestion(chatQuiz.currentQ), 500);
+        }
+
+        async function finishChatQuiz() {
+            chatQuiz.active = false;
+            const loadingMsg = addBotMessage('<i class="fa-solid fa-spinner fa-spin"></i> Analyzing your answers...');
+
+            let dominant = Object.keys(chatQuiz.scores).reduce((a, b) => chatQuiz.scores[a] > chatQuiz.scores[b] ? a : b);
+            const hasOtherAnswers = chatQuiz.answers.some(a => a.type === 'other');
+
+            if (hasOtherAnswers) {
+                try {
+                    let quizSummary = chatQuiz.answers.map(a => `Q: ${a.question}\nA: ${a.answer}`).join('\n\n');
+                    const response = await fetch('https://aurahealth-proto.vercel.app/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `Analyze these Dosha quiz answers. Determine the dominant dosha (Vata, Pitta, or Kapha). 
+                            CRITICAL: If the user's answers are vague, nonsensical, or "idk" to most questions, reply with ONLY the word: unknown. 
+                            Otherwise, reply with ONLY one word: vata, pitta, or kapha.\n\n${quizSummary}`,
+                            userDosha: null
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.choices && data.choices.length > 0) {
+                        const aiAnswer = data.choices[0].message.content.trim().toLowerCase();
+                        if (['vata', 'pitta', 'kapha', 'unknown'].includes(aiAnswer)) {
+                            dominant = aiAnswer;
+                        }
+                    }
+                } catch (e) {
+                    console.error('AI quiz analysis failed:', e);
+                }
+            }
+
+            if (dominant === 'unknown') {
+                loadingMsg.innerHTML = `
+                    🤔 <strong>I need a bit more info!</strong>
+                    <p style="margin-top:8px; color:rgba(255,255,255,0.7);">Your answers were a bit vague for a precise Dosha analysis. To get an accurate result, try to be more specific or choose the options that best describe you!</p>
+                    <button onclick="startChatQuiz()" style="margin-top:12px; background:var(--primary); color:white; border:none; padding:8px 16px; border-radius:12px; cursor:pointer;">Try Again</button>
+                `;
+                return;
+            }
+
+            lastDominantDosha = dominant;
+            syncRoutineTab(dominant);
+            saveUserDosha(dominant);
+            const r = doshaResults[dominant];
+            loadingMsg.innerHTML = `
+                ${r.emoji} <strong>Your Dosha is <span style="color:${r.color}">${r.name}</span>!</strong>
+                <p style="margin-top:8px; color:rgba(255,255,255,0.7);">${r.desc}</p>
+                <div style="margin-top:12px;">
+                    <strong style="color:#4ade80;">Tips:</strong>
+                    <ul style="margin:6px 0 0 16px; color:rgba(255,255,255,0.7);">
+                        ${r.tips.map(t => `<li>${t}</li>`).join('')}
+                    </ul>
+                </div>
+                <p style="margin-top:12px; font-size:0.85rem; color:rgba(255,255,255,0.5);">Check the <strong>Daily Routine</strong> tab for your full personalized plan!</p>
+            `;
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+            input.value = '';
+
+            // If quiz is active, check if it's an answer or a clarification question
+            if (chatQuiz.active) {
+                const lowerMsg = message.toLowerCase();
+                const isQuestion = lowerMsg.includes('?') || lowerMsg.includes('what') || lowerMsg.includes('how') || lowerMsg.includes('why') || lowerMsg.includes('mean');
+
+                if (isQuestion) {
+                    // Treat as a clarification question during quiz
+                    addUserMessage(message);
+                    const chatBox = document.getElementById('chatBox');
+                    const botMsg = document.createElement('div');
+                    botMsg.className = 'message bot';
+                    botMsg.innerText = "Aura is thinking...";
+                    chatBox.appendChild(botMsg);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+
+                    try {
+                        const response = await fetch('https://aurahealth-proto.vercel.app/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                message: `(CONTEXT: User is in the middle of a Dosha quiz at Question ${chatQuiz.currentQ + 1}: "${quizData[chatQuiz.currentQ].question}"). User asked: ${message}. Answer briefly and then remind them to finish the question.`, 
+                                userDosha: lastDominantDosha
+                            })
+                        });
+                        const data = await response.json();
+                        botMsg.innerText = data.choices[0].message.content + "\n\n(Whenever you're ready, just answer the quiz question above!)";
+                    } catch (e) {
+                        botMsg.innerText = "I'm here! What was your question about the quiz?";
+                    }
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    return;
+                }
+
+                // Treat as a quiz answer
+                addUserMessage(message);
+                const qIndex = chatQuiz.currentQ;
+                chatQuiz.answers.push({ question: quizData[qIndex].question, answer: message, type: 'other' });
+                chatQuiz.currentQ = qIndex + 1;
+
+                // Disable buttons on the current question
+                const chatBox = document.getElementById('chatBox');
+                const allBotMsgs = chatBox.querySelectorAll('.message.bot');
+                const lastBotMsg = allBotMsgs[allBotMsgs.length - 1];
+                if (lastBotMsg) {
+                    lastBotMsg.querySelectorAll('button').forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.4';
+                        btn.style.cursor = 'default';
+                    });
+                }
+
+                setTimeout(() => showChatQuizQuestion(chatQuiz.currentQ), 500);
+                return;
+            }
+
+            // Check if user wants to start the quiz
+            const lowerMsg = message.toLowerCase();
+            if (quizTriggers.some(trigger => lowerMsg.includes(trigger))) {
+                addUserMessage(message);
+                startChatQuiz();
+                return;
+            }
+
+            const chatBox = document.getElementById('chatBox');
+
+            // Add user message to local UI
+            addUserMessage(message);
+
+            // Add to AI history
+            chatHistory.push({ role: "user", content: message });
+
+            // Add loading indicator to UI
+            const botMsg = document.createElement('div');
+            botMsg.className = 'message bot';
+            botMsg.innerText = "Aura is thinking...";
+            chatBox.appendChild(botMsg);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch(AURA_CORE_ENGINE, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message, 
+                        history: chatHistory.slice(0, -1), // Send previous history (excluding current msg)
+                        userDosha: lastDominantDosha
+                    })
+                });
+
+                const data = await response.json();
+                let content = data.choices[0].message.content;
+
+                // Add bot response to AI history
+                chatHistory.push({ role: "assistant", content: content });
+                
+                // Keep history lean (last 10 messages)
+                if (chatHistory.length > 10) chatHistory = chatHistory.slice(-10);
+
+                // Check if Aura is issuing a "Power Command" to update the UI
+                if (content.includes('[UPDATE_DOSHA:')) {
+                    const match = content.match(/\[UPDATE_DOSHA:\s*(\w+)\]/);
+                    if (match && match[1]) {
+                        const newDosha = match[1].toLowerCase();
+                        if (['vata', 'pitta', 'kapha'].includes(newDosha)) {
+                            saveUserDosha(newDosha);
+                            syncRoutineTab(newDosha);
+                            applyUserProfile();
+                            content = content.replace(/\[UPDATE_DOSHA:\s*\w+\]/g, '').trim();
+                            showAuraNotification(`✨ Aura has updated your profile to ${newDosha.toUpperCase()}!`);
+                        }
+                    }
+                }
+
+                botMsg.innerText = content;
+            } catch (error) {
+                console.error("Chat error:", error);
+                botMsg.innerText = "Connection error. Please try again later.";
+            }
+            
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function showAuraNotification(text) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                background: linear-gradient(135deg, var(--primary), var(--accent));
+                color: white; padding: 12px 24px; border-radius: 50px;
+                font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+                z-index: 10000; animation: slideDown 0.5s ease forwards;
+            `;
+            toast.innerText = text;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.5s ease forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        function handleChatEnter(e) {
+            if (e.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        // --- Dosha Quiz Logic (10 Essential Questions) ---
+        const quizData = [
+            {
+                question: "What is your body frame like?", options: [
+                    { text: "Naturally thin, find it hard to gain weight.", type: "vata" },
+                    { text: "Average, athletic build.", type: "pitta" },
+                    { text: "Broad, tend to gain weight easily.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How does your skin feel?", options: [
+                    { text: "Dry, rough, or cold.", type: "vata" },
+                    { text: "Warm, oily, or sensitive.", type: "pitta" },
+                    { text: "Smooth, thick, and moist.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How is your appetite?", options: [
+                    { text: "Irregular or unpredictable.", type: "vata" },
+                    { text: "Strong and intense.", type: "pitta" },
+                    { text: "Slow but steady.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How do you react to stress?", options: [
+                    { text: "I become anxious or worried.", type: "vata" },
+                    { text: "I become irritable or angry.", type: "pitta" },
+                    { text: "I stay calm and handle it easily.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How is your sleep pattern?", options: [
+                    { text: "Light or interrupted.", type: "vata" },
+                    { text: "Moderate but sound.", type: "pitta" },
+                    { text: "Deep and long.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How is your digestion?", options: [
+                    { text: "Irregular, prone to bloating.", type: "vata" },
+                    { text: "Fast, prone to acidity.", type: "pitta" },
+                    { text: "Slow, feels heavy after meals.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How is your physical energy?", options: [
+                    { text: "Comes in bursts, then I feel tired.", type: "vata" },
+                    { text: "Moderate and focused.", type: "pitta" },
+                    { text: "Steady and enduring.", type: "kapha" }
+                ]
+            },
+            {
+                question: "What is your typical mood?", options: [
+                    { text: "Changing, enthusiastic, or nervous.", type: "vata" },
+                    { text: "Determined, focused, or impatient.", type: "pitta" },
+                    { text: "Steady, calm, and peaceful.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How do you complete tasks?", options: [
+                    { text: "Quickly, but often leave things unfinished.", type: "vata" },
+                    { text: "Systematically and efficiently.", type: "pitta" },
+                    { text: "Slowly but very thoroughly.", type: "kapha" }
+                ]
+            },
+            {
+                question: "How is your memory?", options: [
+                    { text: "Learn quickly, forget quickly.", type: "vata" },
+                    { text: "Sharp and clear memory.", type: "pitta" },
+                    { text: "Learn slowly, but never forget.", type: "kapha" }
+                ]
+            }
+        ];
+
+        // --- Original Dosha Results with Tips, Dos, Red Flags ---
+        const doshaResults = {
+            vata: {
+                name: 'Vata', color: '#06b6d4', icon: 'fa-wind', emoji: '\uD83C\uDF2A\uFE0F',
+                element: 'The Air Element', focus: 'Grounding, Warmth, and Stability',
+                desc: 'You are creative, energetic, and quick-thinking. Vata types benefit from warm, grounding foods and calming activities like meditation.',
+                tips: ['Eat warm, cooked foods', 'Maintain a regular routine', 'Practice grounding yoga (Tadasana, Vrikshasana)', 'Use Ashwagandha and sesame oil'],
+                dos: [
+                    { title: 'Routine', desc: 'Eat, sleep, and wake at the same time every day to stabilize your energy.' },
+                    { title: 'Moisture', desc: 'Perform a 5-minute self-massage with warm sesame oil before your shower.' }
+                ],
+                donts: [
+                    { title: 'Cold Stimuli', desc: 'Avoid ice-cold drinks, frozen foods, and cold drafts.' },
+                    { title: 'Dryness', desc: 'Avoid "crunchy" dry snacks like popcorn, crackers, and raw salads.' }
+                ]
+            },
+            pitta: {
+                name: 'Pitta', color: '#ef4444', icon: 'fa-fire', emoji: '\uD83D\uDD25',
+                element: 'The Fire Element', focus: 'Cooling, Calm, and Moderation',
+                desc: 'You are ambitious, intelligent, and focused. Pitta types benefit from cooling foods and activities that promote balance and patience.',
+                tips: ['Eat cooling foods (cucumber, mint)', 'Avoid excessive heat and spicy food', 'Practice calming pranayama', 'Use Brahmi and Amla supplements'],
+                dos: [
+                    { title: 'Cool Down', desc: 'Exercise in the early morning or evening; try swimming or moonlit walks.' },
+                    { title: 'Patience', desc: 'Practice mindfulness or meditation to release internal heat and frustration.' }
+                ],
+                donts: [
+                    { title: 'Heating Agents', desc: 'Avoid spicy chilies, hot peppers, and excessive garlic/onions.' },
+                    { title: 'Fermented Items', desc: 'Avoid vinegar, pickles, alcohol, and fermented soy.' }
+                ]
+            },
+            kapha: {
+                name: 'Kapha', color: '#10b981', icon: 'fa-mountain', emoji: '\uD83C\uDF3F',
+                element: 'The Earth Element', focus: 'Stimulation, Lightness, and Movement',
+                desc: 'You are strong, loyal, and nurturing. Kapha types benefit from stimulating activities, lighter foods, and invigorating exercise.',
+                tips: ['Eat light, warm, spicy foods', 'Exercise vigorously and regularly', 'Avoid daytime napping', 'Use Triphala and Tulsi tea'],
+                dos: [
+                    { title: 'Early Rise', desc: 'Wake up before 6:00 AM to prevent grogginess and morning congestion.' },
+                    { title: 'Activity', desc: 'Engage in vigorous exercise daily that makes you break a sweat.' }
+                ],
+                donts: [
+                    { title: 'Heaviness', desc: 'Avoid heavy dairy products like cheese, cold milk, and ice cream.' },
+                    { title: 'Stagnation', desc: 'Avoid daytime napping and sitting for long periods without movement.' }
+                ]
+            }
+        };
+
+        let currentQuestion = 0;
+        let scores = { vata: 0, pitta: 0, kapha: 0 };
+        let userAnswers = []; // stores all answers for AI analysis
+
+        function initQuiz() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            currentQuestion = 0;
+            scores = { vata: 0, pitta: 0, kapha: 0 };
+            userAnswers = [];
+
+            quizData.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = `question-card ${index === 0 ? 'active' : ''}`;
+                card.id = `q-${index}`;
+
+                let optionsHtml = q.options.map(opt =>
+                    `<button class="option-btn" onclick="selectOption('${opt.type}', '${opt.text.replace(/'/g, "\\'")}', ${index})">
+                        ${opt.text} <i class="fa-solid fa-arrow-right" style="opacity: 0.5;"></i>
+                    </button>`
+                ).join('');
+
+                // Add "Other" write-in option
+                optionsHtml += `
+                    <div class="option-btn" style="flex-direction:column; align-items:stretch; gap:8px; cursor:default;">
+                        <span style="display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-pen" style="opacity:0.5;"></i> Other (write your own):</span>
+                        <div style="display:flex; gap:8px;">
+                            <input type="text" id="other-input-${index}" placeholder="Type your answer..." style="flex:1; background:rgba(0,0,0,0.2); border:1px solid var(--glass-border); color:white; padding:0.6rem 1rem; border-radius:12px; outline:none; font-size:0.95rem;">
+                            <button onclick="submitOther(${index})" style="background:var(--primary); color:white; border:none; padding:0.6rem 1.2rem; border-radius:12px; cursor:pointer; font-size:0.9rem;">Submit</button>
+                        </div>
+                    </div>`;
+
+                card.innerHTML = `
+                    <h3>Question ${index + 1} of ${quizData.length}</h3>
+                    <p style="margin-bottom: 2rem; font-size: 1.2rem;">${q.question}</p>
+                    <div class="options-grid">
+                        ${optionsHtml}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            updateProgress();
+
+            document.getElementById('quizContainer').style.display = 'block';
+            document.getElementById('resultContainer').style.display = 'none';
+        }
+
+        function selectOption(type, answerText, qIndex) {
+            scores[type]++;
+            userAnswers.push({ question: quizData[qIndex].question, answer: answerText, type: type });
+            document.getElementById(`q-${currentQuestion}`).classList.remove('active');
+            currentQuestion++;
+
+            if (currentQuestion < quizData.length) {
+                document.getElementById(`q-${currentQuestion}`).classList.add('active');
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function submitOther(qIndex) {
+            const input = document.getElementById(`other-input-${qIndex}`);
+            if (!input.value.trim()) { input.focus(); return; }
+            userAnswers.push({ question: quizData[qIndex].question, answer: input.value.trim(), type: 'other' });
+            document.getElementById(`q-${currentQuestion}`).classList.remove('active');
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                document.getElementById(`q-${currentQuestion}`).classList.add('active');
+                updateProgress();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        async function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'block';
+
+            // First, show score-based result instantly
+            let dominant = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+            // Check if any "other" answers need AI analysis
+            const hasOtherAnswers = userAnswers.some(a => a.type === 'other');
+
+            if (hasOtherAnswers) {
+                // Show loading while AI analyzes
+                document.getElementById('resultTitle').innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Aura AI is analyzing your answers...`;
+                document.getElementById('resultDesc').innerHTML = `<p style="color: var(--text-muted);">Your custom answers are being reviewed by our AI for a more accurate result.</p>`;
+
+                try {
+                    // Build a summary of all answers for the AI
+                    let quizSummary = userAnswers.map(a => `Q: ${a.question}\nA: ${a.answer}`).join('\n\n');
+
+                    const response = await fetch('https://aurahealth-proto.vercel.app/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            message: `Analyze these Dosha quiz answers and determine the dominant dosha (Vata, Pitta, or Kapha). Reply with ONLY one word: vata, pitta, or kapha.\n\n${quizSummary}`,
+                            userDosha: null
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (data.choices && data.choices.length > 0) {
+                        const aiAnswer = data.choices[0].message.content.trim().toLowerCase();
+                        if (['vata', 'pitta', 'kapha'].includes(aiAnswer)) {
+                            dominant = aiAnswer;
+                        }
+                    }
+                } catch (error) {
+                    console.error('AI quiz analysis failed, using score-based result:', error);
+                }
+            }
+
+            lastDominantDosha = dominant;
+            syncRoutineTab(dominant);
+            saveUserDosha(dominant);
+            const r = doshaResults[dominant];
+
+            document.getElementById('resultTitle').innerHTML = `${r.emoji} You are <span style="color:${r.color}">${r.name}</span> Dominant!`;
+            document.getElementById('resultDesc').innerHTML = `
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">${r.element} &bull; Focus: ${r.focus}</p>
+                <p style="color: var(--text-muted); margin-bottom: 2rem;">${r.desc}</p>
+
+                <div style="text-align:left; margin-bottom: 2rem;">
+                    <h4 style="color: var(--accent); margin-bottom: 1rem;"><i class="fa-solid fa-lightbulb"></i> Personalized Tips</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${r.tips.map(t => `<li style="display:flex; align-items:center; gap:10px; margin-bottom:10px; color: var(--text-muted);"><i class="fa-solid fa-check" style="color:#4ade80;"></i> ${t}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div style="text-align:left; margin-bottom: 2rem;">
+                    <h4 style="color: #4ade80; margin-bottom: 1rem;"><i class="fa-solid fa-circle-check" style="color:#4ade80;"></i> Daily Habits (To Do)</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${r.dos.map(d => `<li style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; color: var(--text-muted);"><i class="fa-solid fa-check" style="color:#4ade80; margin-top:4px;"></i> <div><strong>${d.title}:</strong> ${d.desc}</div></li>`).join('')}
+                    </ul>
+                </div>
+
+                <div style="text-align:left; margin-bottom: 2rem;">
+                    <h4 style="color: #f87171; margin-bottom: 1rem;"><i class="fa-solid fa-triangle-exclamation" style="color:#f87171;"></i> Red Flags (To Avoid)</h4>
+                    <ul style="list-style: none; padding: 0;">
+                        ${r.donts.map(d => `<li style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px; color: var(--text-muted);"><i class="fa-solid fa-xmark" style="color:#f87171; margin-top:4px;"></i> <div><strong>${d.title}:</strong> ${d.desc}</div></li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        function resetQuiz() {
+            initQuiz();
+        }
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                initAuth();
+            } catch(e) { console.error("Auth init failed", e); }
+            
+            try {
+                initQuiz();
+            } catch(e) { console.error("Quiz init failed", e); }
+        });
+    </script>
+</body>
+
+</html>
